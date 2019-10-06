@@ -22,14 +22,16 @@ int busca_maior_prior(celula *vetor, int tamanho);
 int busca_menor_tempo(celula *vetor, int tamanho);
 void troca_prior(celula *vetor, int tamanho, int anterior, int novo);
 void troca_tempo(celula *vetor, int tamanho, horario temp_anterior, horario temp_novo);
+void desloca(celula *vetor, int tamanho, int inicio);
 
 int main(){
 	char comando[7];//Ve qual comando o usuario deseja
-	celula vetor[100];
-	int tamanho = 0;
+	celula vetor[100];//Vetor com a quantidade maxima de elementos possivel
+	int tamanho = 0;//Guarda o valor atual de elementos no vetor
 	
 	do{
-		scanf("%s", comando);
+		fflush(stdin);
+		scanf("%s", comando);//Leitura do comando
 		if(strcmp(comando, "add") == 0){
 		    //Adiciona um processo na lista de espera apos o ultimo elemento
 		    char tempo[9];
@@ -54,12 +56,11 @@ int main(){
 		    string[2]='\0';
 		    vetor[tamanho].chegada.ss = atoi(string);
 		    
-			scanf("%d", &vetor[tamanho].prior);
 			scanf("%s", vetor[tamanho].descricao);
 			
-			printf("%2d\n", vetor[tamanho].prior);
+			/*printf("%2d\n", vetor[tamanho].prior);
 			printf("%d:%d:%d\n", vetor[tamanho].chegada.hh, vetor[tamanho].chegada.mm, vetor[tamanho].chegada.ss);
-			printf("%s\n", vetor[tamanho].descricao);
+			printf("%s\n", vetor[tamanho].descricao);*/
 			tamanho++;
 		}
 		else{
@@ -67,15 +68,18 @@ int main(){
 				//Executa um processo de acordo com o criterio
 				char select[3];
 				scanf("%s", select);
-				
+				int i;
 				if(strcmp(select, "-p")==0){
 					//Executa processo com maior prioridade
+					i = busca_maior_prior(vetor, tamanho);
 				}
 				else{
 					if(strcmp(select, "-t")==0){
 						//Executa processo com menor tempo
+						i = busca_menor_tempo(vetor, tamanho);
 					}
 				}
+				desloca(vetor, tamanho, i);//Evita um espaco vago dentro do vetor
 				tamanho--;
 			}
 			else{
@@ -99,7 +103,7 @@ int main(){
 						printf("0%d ", vetor[i].prior);
 					else
 						printf("%d ", vetor[i].prior);
-					printf("%d:%d:%d %s\n", vetor[i].chegada.hh, vetor[i].chegada.mm, vetor[i].chegada.ss, vetor[i].descricao);
+					printf("%d:%d:%d %s\n\n", vetor[i].chegada.hh, vetor[i].chegada.mm, vetor[i].chegada.ss, vetor[i].descricao);
 				}
 				else{
 					if(!strcmp(comando, "change")){
@@ -168,7 +172,7 @@ int main(){
 									printf("%d ", vetor[i].prior);
 								printf("%d:%d:%d %s\n", vetor[i].chegada.hh, vetor[i].chegada.mm, vetor[i].chegada.ss, vetor[i].descricao);
 							}
-							
+							//OBS:DEVEMOS IMPRIMIR A LISTA COM UM SORT
 						}
 					}
 				}
@@ -181,23 +185,67 @@ int main(){
 }
 
 int busca_maior_prior(celula *vetor, int tamanho){
+	//Busca o endereco do elemento com o maior indice de prioridade
 	int i, maior = 0, casa = 0;
 	for(i = 0;i < tamanho;i++){
-		if(vetor[i].prior > maior)
+		if(vetor[i].prior > maior){
 			maior = vetor[i].prior;
 			casa = i;
+		}
 	}
 	return casa;
 }
 
 int busca_menor_tempo(celula *vetor, int tamanho){
-	
+	//Busca o endereco do elemento com o menor tempo
+	int i, horas = 25, minutos = 61, segundos = 61, casa;
+	for(i = 0;i < tamanho;i++){
+		if(vetor[i].chegada.hh < horas){
+			//Se o numero de horas for menor ja atribui
+			horas = vetor[i].chegada.hh;
+			casa = i;
+		}
+		else{
+			if(vetor[i].chegada.hh == horas){
+				//Se o numero de horas e igual,desempata nos minutos
+				if(vetor[i].chegada.mm < minutos){
+					//Se o numero de minutos for menor ja recebe
+					minutos = vetor[i].chegada.mm;
+					casa = i;
+				}
+				else{
+					if(vetor[i].chegada.mm == minutos){
+						//Em caso de minutos iguais os segundos decidem
+						if(vetor[i].chegada.ss < segundos){
+							segundos = vetor[i].chegada.ss;
+							casa = i;
+					}
+					}
+				}
+			}
+		}
+	}
+	return casa;
+}
+
+void desloca(celula *vetor, int tamanho, int inicio){
+	//A partir de uma casa definida,desloca todos os elementos uma casa para a esquerda
+	int i;
+	for(i= inicio;i < tamanho;i++){
+		vetor[i].chegada.hh = vetor[i+1].chegada.hh;
+		vetor[i].chegada.mm = vetor[i+1].chegada.mm;
+		vetor[i].chegada.ss = vetor[i+1].chegada.ss;
+		strcpy(vetor[i].descricao, vetor[i+1].descricao);
+		vetor[i].prior = vetor[i+1].prior;
+	}
+	return;
 }
 
 void troca_prior(celula *vetor, int tamanho, int anterior, int novo){
 	int i;
 	for(i = 0;i < tamanho;i++){
 		if(vetor[i].prior == anterior){
+			//Cada prior e unico,entao encontrando e so trocar
 			vetor[i].prior = novo;
 			break;
 		}
@@ -209,6 +257,7 @@ void troca_tempo(celula *vetor, int tamanho, horario temp_anterior, horario temp
 	int i;
 	for(i = 0;i < tamanho;i++){
 		if(vetor[i].chegada.hh == temp_anterior.hh && vetor[i].chegada.mm == temp_anterior.mm && vetor[i].chegada.hh == temp_anterior.ss){
+			//Encontra o horario especifico e troca
 			vetor[i].chegada.hh = temp_novo.hh;
 			vetor[i].chegada.mm = temp_novo.mm;
 			vetor[i].chegada.ss = temp_novo.ss;
