@@ -12,4 +12,13 @@ add 4 16:19:47 gcalc
 add 17 22:40:32 x-session
 add 1 07:33:25 printer-deamon
 add 3 03:53:17 gimp
+next -p
+next -t
+exec -p
+exec -p
+change -t 06:21:59|02:22:19
+change -p 6|10
+exec -t
+print -p
+print -t
 quit
