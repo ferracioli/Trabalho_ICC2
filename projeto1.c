@@ -167,11 +167,13 @@ int main(){
 			
 			if(!strcmp(select, "-p")){
 				
+				//Ordena o vetor pela prioridade
 				ordenar_prioridade(vetor, 0, tamanho-1);
 
 			}
 			else if(!strcmp(select, "-t")){
 
+				//Ordena o vetor pelo horario
 				ordenar_tempo(vetor, 0, tamanho-1);
 				
 			}
@@ -264,12 +266,14 @@ void troca_tempo(celula *vetor, int tamanho, horario temp_anterior, horario temp
 
 int horario_para_int(horario tmp){
 
+	//Converte o horario para um inteiro (para comparaçoes)
 	return ((tmp.hh*3600)+(tmp.mm*60)+tmp.ss);
 	
 }
 
 void swap(celula *c1, celula *c2){
 
+	//Inverte duas celulas (todos os seus atributos // prioridade, horario, descricao)
 	int tmp_prior, tmp_hh, tmp_mm, tmp_ss;
 	char *tmp_descricao = (char *) malloc((strlen((*c1).descricao) + 1) * sizeof(char));
 
@@ -297,20 +301,24 @@ void swap(celula *c1, celula *c2){
 
 void ordenar_prioridade(celula *vetor, int esquerda, int direita){
   
-    int i, j, x, y;
+	//Ordenação por prioridade, utilizamos o quick sort pois o vetor possui um tamanho médio (merge sort utiliza mais memoria)
+    int i, j, x;
      
+	//Define o inicio, fim e o pivô
     i = esquerda;
     j = direita;
     x = vetor[(esquerda + direita) / 2].prior;
 
     while(i <= j) {
 
+		//Busca por termos maiores e menores que o pivô, respectivamente
         while(vetor[i].prior > x && i < direita)
             i++;
 
         while(vetor[j].prior < x && j > esquerda)
             j--;
 
+		//Inverte os dois termos encontrados
         if(i <= j) {
 
 			swap(&vetor[i], &vetor[j]);
@@ -321,6 +329,7 @@ void ordenar_prioridade(celula *vetor, int esquerda, int direita){
 		}
     }
      
+	//Separa o quick sort em outros dois vetores
     if(j > esquerda)
         ordenar_prioridade(vetor, esquerda, j);
 
@@ -331,20 +340,24 @@ void ordenar_prioridade(celula *vetor, int esquerda, int direita){
 
 void ordenar_tempo(celula *vetor, int esquerda, int direita){
   
+	//Ordenação por horario, utilizamos o quick sort pois o vetor possui um tamanho médio (merge sort utiliza mais memoria)
     int i, j, x;
      
+	//Define o inicio, fim e o pivô
     i = esquerda;
     j = direita;
     x = horario_para_int(vetor[(esquerda + direita) / 2].chegada);
 
     while(i <= j) {
 
+		//Busca por termos maiores e menores que o pivô, respectivamente
         while(horario_para_int(vetor[i].chegada) < x && i < direita)
             i++;
 
         while(horario_para_int(vetor[j].chegada) > x && j > esquerda)
             j--;
 
+		//Inverte os termos encontrados
         if(i <= j) {
 			
 			swap(&vetor[i], &vetor[j]);
@@ -355,6 +368,7 @@ void ordenar_tempo(celula *vetor, int esquerda, int direita){
 		}
     }
      
+	//Divide o quick sort em outros dois vetores
     if(j > esquerda)
         ordenar_tempo(vetor, esquerda, j);
 
